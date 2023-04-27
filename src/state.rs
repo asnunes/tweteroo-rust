@@ -27,9 +27,9 @@ impl TweterooState {
         tweets.push(tweet);
     }
 
-    pub fn get_user(&self, id: &str) -> Option<User> {
+    pub fn get_user(&self, username: &str) -> Option<User> {
         let users = self.users.lock().unwrap();
-        let user = users.iter().find(|u| u.id == id);
+        let user = users.iter().find(|u| u.username == username);
 
         match user {
             Some(user) => Some(user.clone()),
