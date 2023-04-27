@@ -3,6 +3,7 @@ use std::sync::Mutex;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[derive(Debug)]
 pub struct TweterooState {
     users: Mutex<Vec<User>>,
     tweets: Mutex<Vec<Tweet>>,

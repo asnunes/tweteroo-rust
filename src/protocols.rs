@@ -3,7 +3,7 @@ use actix_web::{http, HttpResponse, Responder};
 use actix_web::{body::BoxBody, http::header::ContentType, HttpRequest};
 use serde::Serialize;
 
-pub struct Message<'a> {
+pub struct Response<'a> {
     status: http::StatusCode,
     body: MessageBody<'a>,
 }
@@ -13,7 +13,7 @@ struct MessageBody<'a> {
     message: &'a str,
 }
 
-impl<'a> Responder for Message<'a> {
+impl<'a> Responder for Response<'a> {
     type Body = BoxBody;
 
     fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
@@ -21,12 +21,15 @@ impl<'a> Responder for Message<'a> {
 
         HttpResponse::build(self.status)
             .insert_header(ContentType::json())
-            .body(body.into())
+            .body(body)
     }
 }
 
-impl<'a> Message<'a> {
-    pub fn new(message: &'a str) -> Self {
-        Self { message }
+impl<'a> Response<'a> {
+    pub fn new(status: http::StatusCode, message: &'a str) -> Self {
+        Self {
+            status,
+            body: MessageBody { message },
+        }
     }
 }

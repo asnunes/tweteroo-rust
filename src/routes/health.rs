@@ -1,8 +1,8 @@
-use actix_web::{get, Responder};
+use actix_web::{get, http::StatusCode, Responder};
 
-use crate::protocols::Message;
+use crate::protocols::Response;
 
 #[get("/health")]
 pub async fn health() -> impl Responder {
-    Message::new("OK!")
+    Response::new(StatusCode::OK, "OK!")
 }

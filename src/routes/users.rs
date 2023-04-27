@@ -1,7 +1,7 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{http::StatusCode, post, web, Responder};
 use serde::{Deserialize, Serialize};
 
-use crate::{protocols::Message, state};
+use crate::{protocols::Response, state};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignUpReqBody {
@@ -14,10 +14,8 @@ pub async fn sign_up(
     req_body: web::Json<SignUpReqBody>,
     state: web::Data<state::TweterooState>,
 ) -> impl Responder {
-    println!("body {:?}", req_body);
-
     let user = state::User::new(&req_body.username, &req_body.avatar);
     state.add_user(user);
 
-    Message::new("OK!")
+    Response::new(StatusCode::CREATED, "OK!")
 }
