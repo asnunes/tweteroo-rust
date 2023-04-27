@@ -1,7 +1,7 @@
-use actix_web::{http::StatusCode, post, web, Responder};
+use actix_web::{get, http::StatusCode, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
-use crate::{protocols::Response, state};
+use crate::{protocols::MessageResponse, state};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PostTweetReqBody {
@@ -20,8 +20,17 @@ pub async fn post_tweet(
         let tweet = state::Tweet::new(&user.id, &req_body.tweet);
         state.add_tweet(tweet);
 
-        Response::new(StatusCode::CREATED, "OK!")
+        MessageResponse::new(StatusCode::CREATED, "OK!")
     } else {
-        Response::new(StatusCode::UNAUTHORIZED, "User not found!")
+        MessageResponse::new(StatusCode::UNAUTHORIZED, "User not found!")
     }
+}
+
+#[get("/tweets")]
+pub async fn get_tweets(state: web::Data<state::TweterooState>) -> impl Responder {
+    let tweets = state.get_tweets();
+
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .json(tweets)
 }

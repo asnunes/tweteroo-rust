@@ -37,15 +37,16 @@ impl TweterooState {
         }
     }
 
-    pub fn get_tweet(&self, id: &str) -> Option<Tweet> {
+    pub fn get_tweets(&self) -> Vec<Tweet> {
         let tweets = self.tweets.lock().unwrap();
-        let tweet = tweets.iter().find(|t| t.id == id);
-
-        if let Some(tweet) = tweet {
-            Some(tweet.clone())
-        } else {
-            None
-        }
+        tweets
+            .iter()
+            .clone()
+            .rev()
+            .take(10)
+            .rev()
+            .cloned()
+            .collect()
     }
 }
 

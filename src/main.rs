@@ -13,8 +13,10 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(TweterooState::new()))
             .service(health::health)
             .service(tweets::post_tweet)
+            .service(tweets::get_tweets)
             .service(users::sign_up)
     })
+    .workers(1)
     .bind(("127.0.0.1", 8080))?
     .run()
     .await
