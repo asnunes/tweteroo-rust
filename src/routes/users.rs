@@ -1,8 +1,7 @@
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use std::ops::DerefMut;
 
-use crate::state;
+use crate::{protocols::Message, state};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignUpReqBody {
@@ -20,5 +19,5 @@ pub async fn sign_up(
     let user = state::User::new(&req_body.username, &req_body.avatar);
     state.add_user(user);
 
-    HttpResponse::Ok().body("Sign up!")
+    Message::new("OK!")
 }

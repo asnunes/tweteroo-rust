@@ -2,6 +2,7 @@ use actix_web::{web, App, HttpServer};
 use routes::{health, users};
 use state::TweterooState;
 
+mod protocols;
 mod routes;
 mod state;
 

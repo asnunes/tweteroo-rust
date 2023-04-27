@@ -1,33 +1,50 @@
+use std::sync::Mutex;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 pub struct TweterooState {
-    users: Vec<User>,
-    tweets: Vec<Tweet>,
+    users: Mutex<Vec<User>>,
+    tweets: Mutex<Vec<Tweet>>,
 }
 
 impl TweterooState {
     pub fn new() -> Self {
         Self {
-            users: vec![],
-            tweets: vec![],
+            users: Mutex::new(vec![]),
+            tweets: Mutex::new(vec![]),
         }
     }
 
-    pub fn add_user(&mut self, user: User) {
-        self.users.push(user);
+    pub fn add_user(&self, user: User) {
+        let mut users = self.users.lock().unwrap();
+        users.push(user);
     }
 
-    pub fn add_tweet(&mut self, tweet: Tweet) {
-        self.tweets.push(tweet);
+    pub fn add_tweet(&self, tweet: Tweet) {
+        let mut tweets = self.tweets.lock().unwrap();
+        tweets.push(tweet);
     }
 
-    pub fn get_user(&self, id: &str) -> Option<&User> {
-        self.users.iter().find(|u| u.id == id)
+    pub fn get_user(&self, id: &str) -> Option<User> {
+        let users = self.users.lock().unwrap();
+        let user = users.iter().find(|u| u.id == id);
+
+        match user {
+            Some(user) => Some(user.clone()),
+            None => None,
+        }
     }
 
-    pub fn get_tweet(&self, id: &str) -> Option<&Tweet> {
-        self.tweets.iter().find(|t| t.id == id)
+    pub fn get_tweet(&self, id: &str) -> Option<Tweet> {
+        let tweets = self.tweets.lock().unwrap();
+        let tweet = tweets.iter().find(|t| t.id == id);
+
+        if let Some(tweet) = tweet {
+            Some(tweet.clone())
+        } else {
+            None
+        }
     }
 }
 
