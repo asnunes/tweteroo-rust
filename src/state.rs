@@ -56,6 +56,31 @@ impl TweterooState {
             })
             .collect()
     }
+
+    pub fn get_tweets_by_username(&self, username: &str) -> Vec<TweetWithUser> {
+        let tweets = self.tweets.lock().unwrap();
+        let users = self.users.lock().unwrap();
+
+        let user_opt = users.iter().find(|u| u.username == username);
+        if user_opt.is_none() {
+            return vec![];
+        }
+
+        let user = user_opt.unwrap();
+
+        tweets
+            .iter()
+            .rev()
+            .filter(|tweet| tweet.user_id == user.id)
+            .rev()
+            .take(10)
+            .map(|tweet| TweetWithUser {
+                id: tweet.id.clone(),
+                user: user.clone(),
+                tweet: tweet.tweet.clone(),
+            })
+            .collect()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

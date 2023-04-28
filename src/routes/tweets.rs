@@ -45,7 +45,23 @@ pub async fn get_tweets(state: web::Data<state::TweterooState>) -> impl Responde
         })
         .collect::<Vec<GetTweetResBody>>();
 
-    HttpResponse::Ok()
-        .content_type("application/json")
-        .json(res_body)
+    HttpResponse::Ok().json(res_body)
+}
+
+#[get("/tweets/{username}")]
+pub async fn get_tweets_by_username(
+    path: web::Path<(String,)>,
+    state: web::Data<state::TweterooState>,
+) -> impl Responder {
+    let tweets = state.get_tweets_by_username(&path.0);
+    let res_body = tweets
+        .iter()
+        .map(|tweet| GetTweetResBody {
+            tweet: tweet.tweet.clone(),
+            username: tweet.user.username.clone(),
+            avatar: tweet.user.avatar.clone(),
+        })
+        .collect::<Vec<GetTweetResBody>>();
+
+    HttpResponse::Ok().json(res_body)
 }

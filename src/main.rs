@@ -26,6 +26,7 @@ async fn main() -> std::io::Result<()> {
             .service(health::health)
             .service(tweets::post_tweet)
             .service(tweets::get_tweets)
+            .service(tweets::get_tweets_by_username)
             .service(users::sign_up)
     })
     .workers(1)
