@@ -32,7 +32,7 @@ async fn main() -> std::io::Result<()> {
             .service(tweets::scope())
     })
     .workers(1)
-    .bind(("0.0.0.0", 8080))?
+    .bind(("0.0.0.0", 5000))?
     .run()
     .await
 }
