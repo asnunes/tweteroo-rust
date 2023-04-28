@@ -1,5 +1,6 @@
 use actix_web::{get, http::StatusCode, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 use crate::{protocols::MessageResponse, state};
 
@@ -33,9 +34,20 @@ struct GetTweetResBody {
     avatar: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct GetTweetQuery {
+    #[validate(range(min = 1))]
+    page: Option<usize>,
+}
+
 #[get("/tweets")]
-pub async fn get_tweets(state: web::Data<state::TweterooState>) -> impl Responder {
-    let tweets = state.get_tweets();
+pub async fn get_tweets(
+    state: web::Data<state::TweterooState>,
+    query: web::Query<GetTweetQuery>,
+) -> impl Responder {
+    let page = query.page.unwrap_or(1);
+
+    let tweets = state.get_tweets(page);
     let res_body = tweets
         .iter()
         .map(|tweet| GetTweetResBody {

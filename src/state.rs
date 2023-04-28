@@ -37,13 +37,16 @@ impl TweterooState {
         }
     }
 
-    pub fn get_tweets(&self) -> Vec<TweetWithUser> {
+    pub fn get_tweets(&self, page: usize) -> Vec<TweetWithUser> {
         let tweets = self.tweets.lock().unwrap();
         let users = self.users.lock().unwrap();
+
+        let skip = (page - 1) * 10;
 
         tweets
             .iter()
             .rev()
+            .skip(skip)
             .take(10)
             .rev()
             .map(|tweet| {
