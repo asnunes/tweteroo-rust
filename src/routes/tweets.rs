@@ -1,29 +1,32 @@
-use actix_web::{http::StatusCode, web, HttpResponse, Responder};
+use actix_web::{http::StatusCode, web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    protocols::{MessageBody, MessageResponse},
-    state,
-};
+use crate::{protocols::MessageResponse, state};
 
 pub fn scope() -> actix_web::Scope {
     web::scope("/tweets")
-        .route("/", web::post().to(post_tweet))
-        .route("/", web::get().to(get_tweets))
+        .route("", web::post().to(post_tweet))
+        .route("", web::get().to(get_tweets))
         .route("/{username}", web::get().to(get_tweets_by_username))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PostTweetReqBody {
-    username: String,
     tweet: String,
 }
 
 pub async fn post_tweet(
     req_body: web::Json<PostTweetReqBody>,
+    req: HttpRequest,
     state: web::Data<state::TweterooState>,
 ) -> impl Responder {
-    let user = state.get_user(&req_body.username);
+    let user_header = req.headers().get("user");
+    if user_header.is_none() {
+        return MessageResponse::new(StatusCode::BAD_REQUEST, "User not found!");
+    }
+
+    let username = user_header.unwrap().to_str().unwrap();
+    let user = state.get_user(username);
 
     if let Some(user) = user {
         let tweet = state::Tweet::new(&user.id, &req_body.tweet);
@@ -52,9 +55,6 @@ pub async fn get_tweets(
     query: web::Query<GetTweetQuery>,
 ) -> impl Responder {
     let page = query.page.unwrap_or(1);
-    if page < 1 {
-        return HttpResponse::BadRequest().json(MessageBody::new("Page must be greater than 0!"));
-    }
 
     let tweets = state.get_tweets(page);
     let res_body = tweets
