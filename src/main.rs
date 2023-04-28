@@ -4,7 +4,6 @@ use protocols::MessageBody;
 use routes::{health, tweets, users};
 use state::TweterooState;
 
-mod guards;
 mod protocols;
 mod routes;
 mod state;
@@ -30,9 +29,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(json_config)
             .service(health::health)
             .service(users::sign_up)
-            .service(tweets::post_tweet)
-            .service(tweets::get_tweets)
-            .service(tweets::get_tweets_by_username)
+            .service(tweets::scope())
     })
     .workers(1)
     .bind(("0.0.0.0", 8080))?

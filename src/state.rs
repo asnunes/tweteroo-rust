@@ -37,6 +37,9 @@ impl TweterooState {
         }
     }
 
+    /// This function returns the tweets in reverse order.
+    /// The last tweet will be the first one in the vector.
+    /// It also is paginated, with 10 tweets per page.
     pub fn get_tweets(&self, page: usize) -> Vec<TweetWithUser> {
         let tweets = self.tweets.lock().unwrap();
         let users = self.users.lock().unwrap();
@@ -46,7 +49,7 @@ impl TweterooState {
         tweets
             .iter()
             .rev()
-            .skip(skip)
+            .skip(skip as usize)
             .take(10)
             .rev()
             .map(|tweet| {
@@ -60,6 +63,7 @@ impl TweterooState {
             .collect()
     }
 
+    /// Returns every tweet from a user, in reverse order.
     pub fn get_tweets_by_username(&self, username: &str) -> Vec<TweetWithUser> {
         let tweets = self.tweets.lock().unwrap();
         let users = self.users.lock().unwrap();
@@ -76,7 +80,6 @@ impl TweterooState {
             .rev()
             .filter(|tweet| tweet.user_id == user.id)
             .rev()
-            .take(10)
             .map(|tweet| TweetWithUser {
                 id: tweet.id.clone(),
                 user: user.clone(),

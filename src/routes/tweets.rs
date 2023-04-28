@@ -1,8 +1,17 @@
-use actix_web::{get, http::StatusCode, post, web, HttpResponse, Responder};
+use actix_web::{http::StatusCode, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use validator::Validate;
 
-use crate::{protocols::MessageResponse, state};
+use crate::{
+    protocols::{MessageBody, MessageResponse},
+    state,
+};
+
+pub fn scope() -> actix_web::Scope {
+    web::scope("/tweets")
+        .route("/", web::post().to(post_tweet))
+        .route("/", web::get().to(get_tweets))
+        .route("/{username}", web::get().to(get_tweets_by_username))
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PostTweetReqBody {
@@ -10,7 +19,6 @@ pub struct PostTweetReqBody {
     tweet: String,
 }
 
-#[post("/tweets")]
 pub async fn post_tweet(
     req_body: web::Json<PostTweetReqBody>,
     state: web::Data<state::TweterooState>,
@@ -34,18 +42,19 @@ struct GetTweetResBody {
     avatar: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Validate)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct GetTweetQuery {
-    #[validate(range(min = 1))]
     page: Option<usize>,
 }
 
-#[get("/tweets")]
 pub async fn get_tweets(
     state: web::Data<state::TweterooState>,
     query: web::Query<GetTweetQuery>,
 ) -> impl Responder {
     let page = query.page.unwrap_or(1);
+    if page < 1 {
+        return HttpResponse::BadRequest().json(MessageBody::new("Page must be greater than 0!"));
+    }
 
     let tweets = state.get_tweets(page);
     let res_body = tweets
@@ -60,7 +69,6 @@ pub async fn get_tweets(
     HttpResponse::Ok().json(res_body)
 }
 
-#[get("/tweets/{username}")]
 pub async fn get_tweets_by_username(
     path: web::Path<(String,)>,
     state: web::Data<state::TweterooState>,
