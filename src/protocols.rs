@@ -9,8 +9,14 @@ pub struct MessageResponse<'a> {
 }
 
 #[derive(Serialize)]
-struct MessageBody<'a> {
+pub struct MessageBody<'a> {
     message: &'a str,
+}
+
+impl<'a> MessageBody<'a> {
+    pub fn new(message: &'a str) -> Self {
+        Self { message }
+    }
 }
 
 impl<'a> Responder for MessageResponse<'a> {
@@ -29,7 +35,7 @@ impl<'a> MessageResponse<'a> {
     pub fn new(status: http::StatusCode, message: &'a str) -> Self {
         Self {
             status,
-            body: MessageBody { message },
+            body: MessageBody::new(message),
         }
     }
 }
