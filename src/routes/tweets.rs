@@ -26,11 +26,26 @@ pub async fn post_tweet(
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct GetTweetResBody {
+    tweet: String,
+    username: String,
+    avatar: String,
+}
+
 #[get("/tweets")]
 pub async fn get_tweets(state: web::Data<state::TweterooState>) -> impl Responder {
     let tweets = state.get_tweets();
+    let res_body = tweets
+        .iter()
+        .map(|tweet| GetTweetResBody {
+            tweet: tweet.tweet.clone(),
+            username: tweet.user.username.clone(),
+            avatar: tweet.user.avatar.clone(),
+        })
+        .collect::<Vec<GetTweetResBody>>();
 
     HttpResponse::Ok()
         .content_type("application/json")
-        .json(tweets)
+        .json(res_body)
 }

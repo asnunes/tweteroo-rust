@@ -37,15 +37,23 @@ impl TweterooState {
         }
     }
 
-    pub fn get_tweets(&self) -> Vec<Tweet> {
+    pub fn get_tweets(&self) -> Vec<TweetWithUser> {
         let tweets = self.tweets.lock().unwrap();
+        let users = self.users.lock().unwrap();
+
         tweets
             .iter()
-            .clone()
             .rev()
             .take(10)
             .rev()
-            .cloned()
+            .map(|tweet| {
+                let user = users.iter().find(|u| u.id == tweet.user_id).unwrap();
+                TweetWithUser {
+                    id: tweet.id.clone(),
+                    user: user.clone(),
+                    tweet: tweet.tweet.clone(),
+                }
+            })
             .collect()
     }
 }
@@ -82,4 +90,10 @@ impl Tweet {
             tweet: tweet.to_string(),
         }
     }
+}
+
+pub struct TweetWithUser {
+    pub id: String,
+    pub user: User,
+    pub tweet: String,
 }

@@ -17,7 +17,7 @@ async fn main() -> std::io::Result<()> {
             .service(users::sign_up)
     })
     .workers(1)
-    .bind(("0.0.0.0", 5000))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await
 }
